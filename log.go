@@ -88,17 +88,17 @@ func init() {
 }
 
 // Info Info
-func Info(msg string, args []interface{}) {
+func Info(msg string, args ...interface{}) {
 	zLog.Info(msg, parseArgs(args)...)
 }
 
 // Warn Warn
-func Warn(msg string, args []interface{}) {
+func Warn(msg string, args ...interface{}) {
 	zLog.Warn(msg, parseArgs(args)...)
 }
 
 // Error Error
-func Error(msg string, args []interface{}) {
+func Error(msg string, args ...interface{}) {
 	zLog.Error(msg, parseArgs(args)...)
 }
 
