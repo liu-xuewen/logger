@@ -89,23 +89,30 @@ func init() {
 
 // Info Info
 func Info(msg string, args ...interface{}) {
+	check(args)
 	zLog.Info(msg, parseArgs(args)...)
 }
 
 // Warn Warn
 func Warn(msg string, args ...interface{}) {
+	check(args)
 	zLog.Warn(msg, parseArgs(args)...)
 }
 
 // Error Error
 func Error(msg string, args ...interface{}) {
+	check(args)
 	zLog.Error(msg, parseArgs(args)...)
 }
 
-func parseArgs(args []interface{}) (zf []zap.Field) {
-	if len(args)/2 == 1 {
-		panic(args)
+func check(args []interface{}) {
+	if len(args)%2 == 1 {
+		panic(fmt.Sprintf("check:%v", args))
 	}
+}
+
+func parseArgs(args []interface{}) (zf []zap.Field) {
+
 	var ok bool
 	str := ""
 	for i, v := range args {
