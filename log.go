@@ -88,23 +88,36 @@ func init() {
 }
 
 // Info Info
-func Info(msg string, m map[string]interface{}) {
-	zLog.Info(msg, parseArgs(m)...)
+func Info(msg string, args []interface{}) {
+	zLog.Info(msg, parseArgs(args)...)
 }
 
 // Warn Warn
-func Warn(msg string, m map[string]interface{}) {
-	zLog.Warn(msg, parseArgs(m)...)
+func Warn(msg string, args []interface{}) {
+	zLog.Warn(msg, parseArgs(args)...)
 }
 
 // Error Error
-func Error(msg string, m map[string]interface{}) {
-	zLog.Error(msg, parseArgs(m)...)
+func Error(msg string, args []interface{}) {
+	zLog.Error(msg, parseArgs(args)...)
 }
 
-func parseArgs(m map[string]interface{}) (zf []zap.Field) {
-	for k, v := range m {
-		zf = append(zf, zap.Any(k, v))
+func parseArgs(args []interface{}) (zf []zap.Field) {
+	if len(args)/2 == 1 {
+		panic(args)
+	}
+	var ok bool
+	str := ""
+	for i, v := range args {
+		if i%2 == 0 {
+			str, ok = v.(string)
+			if !ok {
+				panic(args)
+			}
+		} else {
+
+			zf = append(zf, zap.Any(str, v))
+		}
 	}
 	return
 }
