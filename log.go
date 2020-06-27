@@ -2,9 +2,6 @@ package logger
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
 	"time"
 
 	"go.uber.org/zap"
@@ -12,12 +9,14 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-var logCfg config
+var zLog *zap.Logger
 
-type config struct {
-	path     string
-	fileName string
-}
+//var logCfg config
+//
+//type config struct {
+//	path     string
+//	fileName string
+//}
 
 const (
 	// FatalLevel FatalLevel
@@ -28,25 +27,25 @@ const (
 	InfoLevel  = "info"
 )
 
-func init() {
-	logCfg = config{
-		path: os.TempDir(),
-	}
-}
+//func init() {
+//	logCfg = config{
+//		path: os.TempDir(),
+//	}
+//}
 
 // InitLogCfg InitLogCfg
 func InitLogCfg(path string, skip bool) {
-	if path != "" {
-		if !CheckPathExist(path) {
-			if err := os.MkdirAll(path, 0755); err != nil {
-				log.Fatalf("mkdir log path:%s err:%s \n", path, err)
-				return
-			}
-		}
-		logCfg.path = path
-		logCfg.fileName = filepath.Join(logCfg.path, filepath.Base(os.Args[0]+".log"))
-		log.Println("logCfg.fileName:", logCfg.fileName)
-	}
+	//if path != "" {
+	//	if !CheckPathExist(path) {
+	//		if err := os.MkdirAll(path, 0755); err != nil {
+	//			log.Fatalf("mkdir log path:%s err:%s \n", path, err)
+	//			return
+	//		}
+	//	}
+	//	logCfg.path = path
+	//	logCfg.fileName = filepath.Join(logCfg.path, filepath.Base(os.Args[0]+".log"))
+	//	log.Println("logCfg.fileName:", logCfg.fileName)
+	//}
 }
 
 /**
@@ -59,7 +58,7 @@ func InitLogCfg(path string, skip bool) {
  * compress 是否压缩
  * serviceName 服务名
  */
-func LogConf() {
+func init() {
 	now := time.Now()
 	hook := &lumberjack.Logger{
 		Filename:   fmt.Sprintf("log/%04d%02d%02d%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()), //filePath
@@ -68,7 +67,7 @@ func LogConf() {
 		MaxAge:     100000, //days
 		Compress:   false,  // disabled by default
 	}
-	defer hook.Close()
+	defer hook.Close() // todo
 	/*zap 的 Config 非常的繁琐也非常强大，可以控制打印 log 的所有细节，因此对于我们开发者是友好的，有利于二次封装。
 	  但是对于初学者则是噩梦。因此 zap 提供了一整套的易用配置，大部分的姿势都可以通过一句代码生成需要的配置。
 	*/
@@ -85,8 +84,27 @@ func LogConf() {
 		level,                               //日志等级
 	)
 
-	_ = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-	//_log := log.New(hook, "", log.LstdFlags)
-	//gb.Logger = logger.Sugar()
-	//_log.Println("Start...")
+	zLog = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+}
+
+// Info Info
+func Info(msg string, m map[string]interface{}) {
+	zLog.Info(msg, parseArgs(m)...)
+}
+
+// Warn Warn
+func Warn(msg string, m map[string]interface{}) {
+	zLog.Warn(msg, parseArgs(m)...)
+}
+
+// Error Error
+func Error(msg string, m map[string]interface{}) {
+	zLog.Error(msg, parseArgs(m)...)
+}
+
+func parseArgs(m map[string]interface{}) (zf []zap.Field) {
+	for k, v := range m {
+		zf = append(zf, zap.Any(k, v))
+	}
+	return
 }
