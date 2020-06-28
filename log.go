@@ -2,7 +2,8 @@ package logger
 
 import (
 	"fmt"
-	"time"
+	"os"
+	"path/filepath"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -59,10 +60,9 @@ func InitLogCfg(path string, skip bool) {
  * serviceName 服务名
  */
 func init() {
-	now := time.Now()
 	hook := &lumberjack.Logger{
-		Filename:   fmt.Sprintf("log/%04d%02d%02d%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()), //filePath
-		MaxSize:    500,                                                                                                                     // megabytes
+		Filename:   filepath.Join("logs/", filepath.Base(os.Args[0]+".log")), //filePath
+		MaxSize:    512,                                                      // megabytes
 		MaxBackups: 10000,
 		MaxAge:     100000, //days
 		Compress:   false,  // disabled by default
@@ -73,15 +73,11 @@ func init() {
 	*/
 	enConfig := zap.NewProductionEncoderConfig() //生成配置
 
-	// 时间格式
-	enConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-
-	level := zap.InfoLevel
-
+	enConfig.EncodeTime = zapcore.ISO8601TimeEncoder // 时间格式
 	core := zapcore.NewCore(
-		zapcore.NewConsoleEncoder(enConfig), //编码器配置
-		zapcore.AddSync(hook),               //打印到控制台和文件
-		level,                               //日志等级
+		zapcore.NewJSONEncoder(enConfig), //编码器配置
+		zapcore.AddSync(hook),            //打印到控制台和文件
+		zap.InfoLevel,                    //日志等级
 	)
 
 	zLog = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
