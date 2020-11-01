@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -38,26 +37,18 @@ func init() {
 
 // Info Info
 func Info(ctx context.Context, msg string, args ...interface{}) {
-	check(args)
+
 	zLog.Info(msg, parseArgs(ctx, args)...)
 }
 
 // Warn Warn
 func Warn(ctx context.Context, msg string, args ...interface{}) {
-	check(args)
 	zLog.Warn(msg, parseArgs(ctx, args)...)
 }
 
 // Error Error
 func Error(ctx context.Context, msg string, args ...interface{}) {
-	check(args)
 	zLog.Error(msg, parseArgs(ctx, args)...)
-}
-
-func check(args []interface{}) {
-	if len(args)%2 == 1 {
-		panic(fmt.Sprintf("check:%v", args))
-	}
 }
 
 func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
@@ -67,7 +58,8 @@ func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
 		if i%2 == 0 {
 			str, ok = v.(string)
 			if !ok {
-				panic(args)
+				// 说明不是key
+				zf = append(zf, zap.Any("args", v))
 			}
 		} else {
 
