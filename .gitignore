@@ -3,3 +3,4 @@ vendor/
 *.tar.gz
 bin
 logs
+git.bash

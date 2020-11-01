@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,53 +13,6 @@ import (
 
 var zLog *zap.Logger
 
-//var logCfg config
-//
-//type config struct {
-//	path     string
-//	fileName string
-//}
-
-const (
-	// FatalLevel FatalLevel
-	FatalLevel = "fatal"
-	PanicLevel = "panic"
-	ErrorLevel = "error"
-	WarnLevel  = "warn"
-	InfoLevel  = "info"
-)
-
-//func init() {
-//	logCfg = config{
-//		path: os.TempDir(),
-//	}
-//}
-
-// InitLogCfg InitLogCfg
-func InitLogCfg(path string, skip bool) {
-	//if path != "" {
-	//	if !CheckPathExist(path) {
-	//		if err := os.MkdirAll(path, 0755); err != nil {
-	//			log.Fatalf("mkdir log path:%s err:%s \n", path, err)
-	//			return
-	//		}
-	//	}
-	//	logCfg.path = path
-	//	logCfg.fileName = filepath.Join(logCfg.path, filepath.Base(os.Args[0]+".log"))
-	//	log.Println("logCfg.fileName:", logCfg.fileName)
-	//}
-}
-
-/**
- * LogConf 获取日志
- * filePath 日志文件路径
- * level 日志级别
- * maxSize 每个日志文件保存的最大尺寸 单位：M
- * maxBackups 日志文件最多保存多少个备份
- * maxAge 文件最多保存多少天
- * compress 是否压缩
- * serviceName 服务名
- */
 func init() {
 	hook := &lumberjack.Logger{
 		Filename:   filepath.Join("logs/", filepath.Base(os.Args[0]+".log")), //filePath
@@ -68,12 +22,10 @@ func init() {
 		Compress:   false,  // disabled by default
 	}
 	defer hook.Close() // todo
-	/*zap 的 Config 非常的繁琐也非常强大，可以控制打印 log 的所有细节，因此对于我们开发者是友好的，有利于二次封装。
-	  但是对于初学者则是噩梦。因此 zap 提供了一整套的易用配置，大部分的姿势都可以通过一句代码生成需要的配置。
-	*/
+
 	enConfig := zap.NewProductionEncoderConfig() //生成配置
 
-	enConfig.EncodeCaller=zapcore.FullCallerEncoder
+	enConfig.EncodeCaller = zapcore.FullCallerEncoder
 	enConfig.EncodeTime = zapcore.ISO8601TimeEncoder // 时间格式
 	core := zapcore.NewCore(
 		zapcore.NewJSONEncoder(enConfig), //编码器配置
@@ -85,21 +37,21 @@ func init() {
 }
 
 // Info Info
-func Info(msg string, args ...interface{}) {
+func Info(ctx context.Context, msg string, args ...interface{}) {
 	check(args)
-	zLog.Info(msg, parseArgs(args)...)
+	zLog.Info(msg, parseArgs(ctx, args)...)
 }
 
 // Warn Warn
-func Warn(msg string, args ...interface{}) {
+func Warn(ctx context.Context, msg string, args ...interface{}) {
 	check(args)
-	zLog.Warn(msg, parseArgs(args)...)
+	zLog.Warn(msg, parseArgs(ctx, args)...)
 }
 
 // Error Error
-func Error(msg string, args ...interface{}) {
+func Error(ctx context.Context, msg string, args ...interface{}) {
 	check(args)
-	zLog.Error(msg, parseArgs(args)...)
+	zLog.Error(msg, parseArgs(ctx, args)...)
 }
 
 func check(args []interface{}) {
@@ -108,8 +60,7 @@ func check(args []interface{}) {
 	}
 }
 
-func parseArgs(args []interface{}) (zf []zap.Field) {
-
+func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
 	var ok bool
 	str := ""
 	for i, v := range args {
