@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -58,8 +59,15 @@ func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
 		if i%2 == 0 {
 			str, ok = v.(string)
 			if !ok {
-				// 说明不是key
-				zf = append(zf, zap.Any("args", v))
+				// 支持map[string]interface{}
+				vMap, ok := v.(map[string]interface{})
+				if ok {
+					for key, val := range vMap {
+						zf = append(zf, zap.Any(key, val))
+					}
+				} else {
+					zf = append(zf, zap.Any("arg_"+strconv.Itoa(i), v))
+				}
 			}
 		} else {
 
