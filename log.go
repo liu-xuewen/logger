@@ -13,10 +13,15 @@ import (
 
 var zLog *zap.Logger
 
-func init() {
+func Init(fileName string) {
+
+	if fileName == "" {
+		fileName = filepath.Join("logs/", filepath.Base(os.Args[0]+".log"))
+	}
+
 	hook := &lumberjack.Logger{
-		Filename:   filepath.Join("logs/", filepath.Base(os.Args[0]+".log")), //filePath
-		MaxSize:    512,                                                      // megabytes
+		Filename:   fileName, //filePath
+		MaxSize:    512,      // megabytes
 		MaxBackups: 10000,
 		MaxAge:     100000, //days
 		Compress:   false,  // disabled by default
