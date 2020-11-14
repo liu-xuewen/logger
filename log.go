@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/liu-xuewen/go-lib/ctxlib"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -14,7 +16,6 @@ import (
 var zLog *zap.Logger
 
 func Init(fileName string) {
-
 	if fileName == "" {
 		fileName = filepath.Join("logs/", filepath.Base(os.Args[0]+".log"))
 	}
@@ -58,6 +59,12 @@ func Error(ctx context.Context, msg string, args ...interface{}) {
 }
 
 func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
+	if defaultCtxKeys != nil {
+		for _, key := range defaultCtxKeys {
+			zf = append(zf, zap.Any(string(key), ctxlib.GetString(ctx, key, "")))
+		}
+	}
+
 	var ok bool
 	str := ""
 	for i, v := range args {

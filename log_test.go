@@ -1,13 +1,15 @@
 package logger
 
 import (
+	"context"
 	"errors"
 	"testing"
 )
 
 func TestErrorLog(t *testing.T) {
 	err := errors.New("test error")
-	Error("test err", "err", err)
+	ctx:=context.Background()
+	Error(ctx,"test err", "err", err)
 	err = nil
-	Error("test nil", "err", err)
+	Error(ctx,"test nil", "err", err)
 }
