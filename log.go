@@ -44,7 +44,6 @@ func Init(fileName string) {
 
 // Info Info
 func Info(ctx context.Context, msg string, args ...interface{}) {
-
 	zLog.Info(msg, parseArgs(ctx, args)...)
 }
 
@@ -59,10 +58,12 @@ func Error(ctx context.Context, msg string, args ...interface{}) {
 }
 
 func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
-	if defaultCtxKeys != nil {
-		for _, key := range defaultCtxKeys {
-			zf = append(zf, zap.Any(string(key), ctxlib.GetString(ctx, key, "")))
-		}
+	for _, key := range cfg.defaultCtxKeys {
+		zf = append(zf, zap.Any(string(key), ctxlib.GetString(ctx, key, "")))
+	}
+
+	for key, val := range cfg.defaultKeyValMap {
+		zf = append(zf, zap.Any(key, val))
 	}
 
 	var ok bool
