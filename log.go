@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/liu-xuewen/go-lib/ctxlib"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -59,7 +57,7 @@ func Error(ctx context.Context, msg string, args ...interface{}) {
 
 func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
 	for _, key := range cfg.defaultCtxKeys {
-		zf = append(zf, zap.Any(string(key), ctxlib.GetString(ctx, key, "")))
+		zf = append(zf, zap.Any(string(key), ctx.Value(key)))
 	}
 
 	for key, val := range cfg.defaultKeyValMap {
