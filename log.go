@@ -55,7 +55,7 @@ func Error(ctx context.Context, msg string, args ...interface{}) {
 	zLog.Error(msg, parseArgs(ctx, args)...)
 }
 
-func parseArgs(ctx context.Context, args ...interface{}) (zf []zap.Field) {
+func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
 	for _, key := range cfg.defaultCtxKeys {
 		zf = append(zf, zap.Any(string(key), ctx.Value(key)))
 	}
