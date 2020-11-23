@@ -29,15 +29,15 @@ func Init(fileName string) {
 
 	enConfig := zap.NewProductionEncoderConfig() //生成配置
 
-	enConfig.EncodeCaller = zapcore.FullCallerEncoder
-	enConfig.EncodeTime = zapcore.ISO8601TimeEncoder // 时间格式
+	//enConfig.EncodeCaller = zapcore.FullCallerEncoder
+	//enConfig.EncodeTime = zapcore.ISO8601TimeEncoder // 时间格式
 	core := zapcore.NewCore(
 		zapcore.NewJSONEncoder(enConfig), //编码器配置
 		zapcore.AddSync(hook),            //打印到控制台和文件
 		zap.InfoLevel,                    //日志等级
 	)
 
-	zLog = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	zLog = zap.New(core)
 }
 
 // Info Info
@@ -70,15 +70,7 @@ func parseArgs(ctx context.Context, args ...interface{}) (zf []zap.Field) {
 		if i%2 == 0 {
 			str, ok = v.(string)
 			if !ok {
-				// 支持map[string]interface{}
-				vMap, ok := v.(map[string]interface{})
-				if ok {
-					for key, val := range vMap {
-						zf = append(zf, zap.Any(key, val))
-					}
-				} else {
-					zf = append(zf, zap.Any("arg_"+strconv.Itoa(i), v))
-				}
+				zf = append(zf, zap.Any("arg_"+strconv.Itoa(i), v))
 			}
 		} else {
 
