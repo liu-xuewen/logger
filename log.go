@@ -28,10 +28,7 @@ func Init(fileName string) {
 	}
 	defer hook.Close() // todo
 
-	enConfig := zap.NewProductionEncoderConfig() //生成配置
-
-	enConfig.EncodeCaller = zapcore.ShortCallerEncoder
-	enConfig.EncodeTime = zapcore.ISO8601TimeEncoder // 时间格式
+	enConfig := NewProductionEncoderConfig() //生成配置
 	core := zapcore.NewCore(
 		zapcore.NewJSONEncoder(enConfig), //编码器配置
 		zapcore.AddSync(hook),            //打印到控制台和文件
@@ -39,6 +36,25 @@ func Init(fileName string) {
 	)
 
 	zLog = zap.New(core)
+}
+
+// NewProductionEncoderConfig returns an opinionated EncoderConfig for
+// production environments.
+func NewProductionEncoderConfig() zapcore.EncoderConfig {
+	return zapcore.EncoderConfig{
+		TimeKey:        "@timestamp",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      zapcore.OmitKey,
+		FunctionKey:    zapcore.OmitKey,
+		MessageKey:     "msg",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+	}
 }
 
 // Info Info
