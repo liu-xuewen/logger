@@ -30,8 +30,8 @@ func Init(fileName string) {
 
 	enConfig := zap.NewProductionEncoderConfig() //生成配置
 
-	//enConfig.EncodeCaller = zapcore.FullCallerEncoder
-	//enConfig.EncodeTime = zapcore.ISO8601TimeEncoder // 时间格式
+	enConfig.EncodeCaller = zapcore.ShortCallerEncoder
+	enConfig.EncodeTime = zapcore.ISO8601TimeEncoder // 时间格式
 	core := zapcore.NewCore(
 		zapcore.NewJSONEncoder(enConfig), //编码器配置
 		zapcore.AddSync(hook),            //打印到控制台和文件
