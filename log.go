@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -73,7 +72,6 @@ func Error(ctx context.Context, msg string, args ...interface{}) {
 }
 
 func parseArgs(ctx context.Context, args []interface{}) (zf []zap.Field) {
-	zf = append(zf, zap.Any("@timestamp", time.Now()))
 	for _, key := range cfg.defaultCtxKeys {
 		zf = append(zf, zap.Any(string(key), ctx.Value(key)))
 	}
